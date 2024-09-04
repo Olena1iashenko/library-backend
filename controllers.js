@@ -1,4 +1,4 @@
-import * as booksService from "./services.js";
+import * as booksService from "./services.ts";
 import controllerWrapper from "./helpers/controllerWrapper.js";
 
 const getAllBooks = (req, res, next) => {

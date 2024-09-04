@@ -1,10 +1,12 @@
 // import booksControllers from "./controllers.js";
 import db from "./db.js";
+import express from "express";
+import booksRouter from "./booksRouter.js";
+
 console.log("Start");
 const startServer = () => {
   console.log("Next");
 
-  // const express = require("express");
   const app = express();
   const port = 3000;
 
