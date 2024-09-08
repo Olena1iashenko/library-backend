@@ -1,40 +1,64 @@
-import db from "./db.js";
+import { log } from "node:console";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-export const getAllBooks = () => {
-  return db || [];
+const booksPath = path.resolve("db.json");
+
+export const getAllBooks = async () => {
+  const books = await fs.readFile(booksPath, "utf-8");
+  return JSON.parse(books);
 };
 
-export const getOneBook = (isbn) => {
-  const book = db.find((book) => book.isbn === isbn);
-  return book || null;
-};
-
-export const addBook = (book) => {
-  if (getOneBook(book.isbn)) {
-    throw new Error("Book with this ISBN already exists");
+export const getOneBook = async (isbn) => {
+  const books = await getAllBooks();
+  const book = books.find((book) => String(book.isbn) === String(isbn));
+  if (!book) {
+    return null;
   }
-  db.push(book);
+  return book;
 };
 
-export const updateBook = (isbn, updatedBook) => {
-  const existingBookIndex = db.findIndex((book) => book.isbn === isbn);
-  if (existingBookIndex === -1) {
+export const addBook = async (book) => {
+  const books = await getAllBooks();
+  books.push(book);
+  await fs.writeFile(booksPath, JSON.stringify(books, null, 2));
+  return book;
+};
+
+export const updateBook = async (isbn, updatedBook) => {
+  const books = await getAllBooks();
+  const existingBookIndex = books.findIndex((book) => {
+    return String(book.isbn) === String(isbn);
+  });
+
+  if (!books[existingBookIndex]) {
     throw new Error("Book with this ISBN not found");
   }
-  db[existingBookIndex] = { ...db[existingBookIndex], ...updatedBook };
+
+  books[existingBookIndex] = { ...books[existingBookIndex], ...updatedBook };
+  await fs.writeFile(booksPath, JSON.stringify(books, null, 2));
+
+  return books[existingBookIndex];
 };
 
-export const deleteBook = (isbn) => {
-  const existingBookIndex = db.findIndex((book) => book.isbn === isbn);
-  if (existingBookIndex === -1) {
+export const deleteBook = async (isbn) => {
+  const books = await getAllBooks();
+  const existingBookIndex = books.findIndex((book) => {
+    return String(book.isbn) === String(isbn);
+  });
+  if (!books[existingBookIndex]) {
     throw new Error("Book with this ISBN not found");
   }
-  db.splice(existingBookIndex, 1);
+  books.splice(existingBookIndex, 1);
+  await fs.writeFile(booksPath, JSON.stringify(books, null, 2));
+
+  return books[existingBookIndex];
 };
 
-export const searchBooks = (query) => {
+export const searchBooks = async (query) => {
+  const books = await getAllBooks();
   const result =
-    db.filter(
+    books.filter(
       (book) =>
         book.isbn.trim().includes(query.trim()) ||
         book.title.toLowerCase().trim().includes(query.toLowerCase().trim())
@@ -46,10 +70,15 @@ export const searchBooks = (query) => {
   return result;
 };
 
-export const markAsBorrowed = (isbn, isBorrowed) => {
-  const existingBookIndex = db.findIndex((book) => book.isbn === isbn);
+export const markAsBorrowed = async (isbn, isBorrowed) => {
+  const books = await getAllBooks();
+
+  const existingBookIndex = books.findIndex((book) => book.isbn === isbn);
   if (existingBookIndex === -1) {
     throw new Error("Book with this ISBN not found");
   }
-  db[existingBookIndex].isBorrowed = isBorrowed;
+  books[existingBookIndex].isBorrowed = !books[existingBookIndex].isBorrowed;
+
+  await fs.writeFile(booksPath, JSON.stringify(books, null, 2));
+  return books[existingBookIndex];
 };
