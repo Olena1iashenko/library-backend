@@ -1,16 +1,21 @@
 import express from "express";
 import booksRouter from "./booksRouter.js";
 import cors from "cors";
+// const cors = require("cors");
 
 console.log("Start");
 const startServer = () => {
   console.log("Next");
+  const corsOptions = {
+    origin: "*",
+  };
 
   const app = express();
   const port = 3000;
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cors());
+  app.use(cors(corsOptions));
 
   app.get("/", (req, res) => {
     res.send("Hello World!");
