@@ -1,5 +1,6 @@
 import express from "express";
 import booksRouter from "./booksRouter.js";
+import cors from "cors";
 
 console.log("Start");
 const startServer = () => {
@@ -9,6 +10,7 @@ const startServer = () => {
   const port = 3000;
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cors());
 
   app.get("/", (req, res) => {
     res.send("Hello World!");
