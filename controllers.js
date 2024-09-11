@@ -1,8 +1,8 @@
 import * as booksService from "./services.js";
 import controllerWrapper from "./helpers/controllerWrapper.js";
 
-const getAllBooks = (req, res, next) => {
-  const books = booksService.getAllBooks();
+const getAllBooks = async (req, res, next) => {
+  const books = await booksService.getAllBooks();
   res.status(200).json({ message: "Books get succesfully", books });
 };
 
